@@ -1,0 +1,23 @@
+if test x$2 = x; then
+   echo usage is: make-libgodot.framework GODOT_DIR OUTPUT_DIR
+   exit 1
+fi
+
+DIR=$1
+ODIR=$2
+
+echo '#define LIBRARY_ENABLED' > "$ODIR/libgodot.h"
+#echo '#define LIBRARY_ENABLED' > "$ODIR/libgodot_callable.h"
+
+cp "$DIR/core/extension/gdextension_interface.h" $ODIR/gdextension_interface.h
+
+sed -e 's#core/extension/gdextension#gdextension#' -e 's/bool/int/' < "$DIR/core/libgodot/libgodot.h" >> "$ODIR/libgodot.h"
+
+#cat $DIR/core/libgodot/libgodot_callable.h >> $ODIR/libgodot_callable.h
+
+cat > "$ODIR/module.modulemap" << EOF
+module libgodot {
+    header "libgodot.h"
+    export *
+}
+EOF
