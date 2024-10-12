@@ -23,5 +23,11 @@ module libgodot {
 }
 EOF
 
-xcodebuild -create-xcframework -library $LIPODIR/libgodot.dylib -headers $tmp -output $ODIR/libgodot.xcframework
+# build the xcframework
+xcodebuild -create-xcframework -library "$LIPODIR/libgodot.dylib" -headers "$tmp" -output "$ODIR/libgodot.xcframework"
+
+# adjust the install names to use the rpath so that we can find the library at runtime
+install_name_tool -id "@rpath/libgodot.dylib" "$ODIR/libgodot.xcframework/macos-arm64/libgodot.dylib"
+otool -D "$ODIR/libgodot.xcframework/macos-arm64/libgodot.dylib"
+
 rm -rf /tmp/dir-$$
