@@ -43,8 +43,7 @@ var products: [Product] = [
 
     .plugin(
         name: "ExtensionBuilderPlugin",
-        targets: ["ExtensionBuilderPlugin"]
-    ),
+        targets: ["ExtensionBuilderPlugin"]),
 ]
 
 // Macros aren't supported on Windows before 5.9.1 and this sample uses them
@@ -93,14 +92,6 @@ var targets: [Target] = [
         ]
     ),
 
-    // The extension builder takes one or more .gdswift files and produces
-    // corresponding .gdextension files with the built Swift library paths
-    // embedded in them.
-    .executableTarget(
-        name: "ExtensionBuilder",
-        dependencies: []
-    ),
-
     // This is a build-time plugin that invokes the generator and produces
     // the bindings that are compiled into SwiftGodot
     .plugin(
@@ -109,12 +100,14 @@ var targets: [Target] = [
         dependencies: ["Generator"]
     ),
 
-    // This is a build-time plugin that can generate a .gdextension file
-    // for an extension, from a .gdswift file
+    // This is a build-time plugin that can generate a .gdextension file.
     .plugin(
         name: "ExtensionBuilderPlugin",
-        capability: .buildTool(),
-        dependencies: ["ExtensionBuilder"]
+        capability: .command(
+            intent: .custom(
+                verb: "make-extension",
+                description: "Generate a gdextension file for a SwiftGodot library."),
+            permissions: [.writeToPackageDirectory(reason: "To write the generated gdextension file.")])
     ),
 
     // This allows the Swift code to call into the Godot bridge API (GDExtension)
