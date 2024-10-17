@@ -43,8 +43,11 @@ var products: [Product] = [
 
     .plugin(
         name: "ExtensionBuilderPlugin",
-        targets: ["ExtensionBuilderPlugin"]
-    ),
+        targets: ["ExtensionBuilderPlugin"]),
+
+    .plugin(
+        name: "ExtensionBuilderToolPlugin",
+        targets: ["ExtensionBuilderToolPlugin"]),
 ]
 
 // Macros aren't supported on Windows before 5.9.1 and this sample uses them
@@ -114,6 +117,18 @@ var targets: [Target] = [
     .plugin(
         name: "ExtensionBuilderPlugin",
         capability: .buildTool(),
+        dependencies: ["ExtensionBuilder"]
+    ),
+
+    // This is a build-time plugin that can generate a .gdextension file
+    // for an extension, from a .gdswift file
+    .plugin(
+        name: "ExtensionBuilderToolPlugin",
+        capability: .command(
+            intent: .custom(
+                verb: "make-extension",
+                description: "Generate a gdextension file for a SwiftGodot library."),
+            permissions: [.writeToPackageDirectory(reason: "To write the generated gdextension file.")]),
         dependencies: ["ExtensionBuilder"]
     ),
 
