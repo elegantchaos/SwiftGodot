@@ -242,7 +242,7 @@ public macro signal(_ signalName: String, arguments: Dictionary<String, Any.Type
 
 /// Defines a Godot signal on a class.
 ///
-/// The `@Godot` macro will register any #signal defined signals so that they can be used in the editor.
+/// The `@Godot` macro will register any @Signal defined signals so that they can be used in the editor.
 ///
 /// Usage:
 /// ```swift

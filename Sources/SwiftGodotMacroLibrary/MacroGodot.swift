@@ -164,6 +164,22 @@ class GodotMacroProcessor {
         ctor.append(")")
     }
     
+    func classInitNuSignals(_ declSyntax: MacroExpansionDeclSyntax) throws {
+        guard declSyntax.macroName.tokenKind == .identifier("nusignal") else {
+            return
+        }
+
+        guard let firstArg = declSyntax.arguments.first else {
+            return
+        }
+
+        guard let signalName = firstArg.expression.signalName() else {
+            return
+        }
+
+        ctor.append("\(className)._\(signalName.swiftName).register(\"\(signalName.godotName)\", info: classInfo)")
+    }
+
     func processExportGroup(name: String, prefix: String) {
         ctor.append(
             """
@@ -504,6 +520,7 @@ class GodotMacroProcessor {
                 }
             } else if let macroExpansion {
                 try classInitSignals(macroExpansion)
+                try classInitNuSignals(macroDecl)
             }
         }
 
