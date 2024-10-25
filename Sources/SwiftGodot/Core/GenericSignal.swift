@@ -26,7 +26,7 @@ public class GenericSignal<each T: VariantStorable> {
     /// - flags: Optional, can be also added to configure the connection's behavior (see ``Object/ConnectFlags`` constants).
     /// - Returns: an object token that can be used to disconnect the object from the target on success, or the error produced by Godot.
     ///
-    @discardableResult /* Signal1 */
+    @discardableResult
     public func connect(flags: Object.ConnectFlags = [], _ callback: @escaping (_ t: repeat each T) -> Void) -> Object {
         let signalProxy = SignalProxy()
         signalProxy.proxy = { args in
@@ -48,6 +48,11 @@ public class GenericSignal<each T: VariantStorable> {
     /// ``connect(flags:_:)``
     public func disconnect(_ token: Object) {
         target.disconnect(signal: signalName, callable: Callable(object: token, method: SignalProxy.proxyName))
+    }
+
+    /// Emit the signal (with required arguments, if there are any)
+    public func emit(_ t: repeat each T) {
+        target.emitSignal(signalName, repeat each t)
     }
 
     /// You can await this property to wait for the signal to be emitted once.
