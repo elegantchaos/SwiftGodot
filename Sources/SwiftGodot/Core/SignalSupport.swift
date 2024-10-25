@@ -151,6 +151,8 @@ public class SignalProxy: Object {
 /// }
 /// ```
 ///
+public typealias SimpleSignal2 = GenericSignal< /* */ >
+
 public class SimpleSignal {
     var target: Object
     var signalName: StringName
