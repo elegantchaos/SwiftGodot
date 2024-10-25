@@ -51,8 +51,15 @@ public class GenericSignal<each T: VariantStorable> {
     }
 
     /// Emit the signal (with required arguments, if there are any)
-    public func emit(_ t: repeat each T) {
-        target.emitSignal(signalName, repeat each t)
+    @discardableResult /* discardable per discardableList: Object, emit_signal */
+    public func emit(_ t: repeat each T) -> GodotError {
+        var args = [Variant]()
+        args.append(Variant(signalName))
+        for arg in repeat each t {
+            args.append(Variant(arg))
+        }
+        let result = target.emitSignalWithArguments(args)
+        return GodotError(rawValue: Int64(result)!)!
     }
 
     /// You can await this property to wait for the signal to be emitted once.
