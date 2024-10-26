@@ -117,6 +117,8 @@ class ArgumentPopper {
     }
 
     func pop<T: VariantStorable>(as: T.Type) -> T? {
-        return T.init(arguments.removeFirst())
+        let a = arguments.removeFirst()
+        let v = (a.gtype == .object) ? a.asObject() as? T : T(a)
+        return v
     }
 }
