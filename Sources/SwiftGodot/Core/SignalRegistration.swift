@@ -5,22 +5,6 @@
 //  Created by Padraig O Cinneide on 2023-10-18.
 //
 
-public struct SignalAdaptor {
-
-    let signal: StringName
-    let instance: Object
-
-    public init(signal: StringName, instance: Object) {
-        self.signal = signal
-        self.instance = instance
-    }
-
-    @discardableResult
-    public func connect(to: Object, method: String) -> GodotError {
-        return instance.connect(signal: signal, callable: .init(object: to, method: .init(method)))
-    }
-}
-
 /// Describes a signal and its arguments.
 /// - note: It is recommended to use the #signal macro instead of using this directly.
 public struct SignalWithNoArguments {
