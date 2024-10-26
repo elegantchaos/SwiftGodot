@@ -53,8 +53,7 @@ public class GenericSignal<each T: VariantStorable> {
     /// Emit the signal (with required arguments, if there are any)
     @discardableResult /* discardable per discardableList: Object, emit_signal */
     public func emit(_ t: repeat each T) -> GodotError {
-        var args = [Variant]()
-        args.append(Variant(signalName))
+        var args = [Variant(signalName)]
         for arg in repeat each t {
             args.append(Variant(arg))
         }

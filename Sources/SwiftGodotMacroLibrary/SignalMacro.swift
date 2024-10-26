@@ -174,7 +174,7 @@ public struct NuSignalMacro: DeclarationMacro {
 
         let genericTypeList = arguments.map { $0.type }.joined(separator: ", ")
 
-        let signalWrapperType = arguments.isEmpty ? "SimpleSignal" : "GenericSignal<\(genericTypeList)>"
+        let signalWrapperType = arguments.isEmpty ? "GenericSignal< /* no args */ >" : "GenericSignal<\(genericTypeList)>"
 
         return [
             DeclSyntax(
