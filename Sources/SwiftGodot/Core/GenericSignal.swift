@@ -6,7 +6,7 @@ extension VariantStorable {
     static func propInfo(name: String) -> PropInfo {
         let gType = Self.Representable.godotType
         return PropInfo(
-            propertyType: gType, 
+            propertyType: gType,
             propertyName: StringName(name),
             className: gType == .object ? StringName(String(describing: Self.self)) : "",
             hint: .none,
@@ -14,32 +14,6 @@ extension VariantStorable {
             usage: .default
         )
     }
-}
-
-func getProps<each TT>(_ type: repeat each TT) -> [PropInfo] {
-    var args = [PropInfo]()
-    var argC = 1
-    for arg in repeat each type {
-        if let a = arg as? any VariantStorable.Type {
-            args.append(a.propInfo(name: "arg\(argC)"))
-            // let gType = a.Representable.godotType
-            // args.append(
-            //     PropInfo(
-            //         propertyType: gType, 
-            //         propertyName: "arg\(argC)",
-            //         className: gType == .object ? StringName(String(describing: a.self)) : "",
-            //         hint: .none,
-            //         hintStr: "",
-            //         usage: .default
-            //     )
-            // )
-            argC += 1
-            print("variant")
-        } else {
-            print("not variant")
-        }
-    }
-    return args
 }
 
 /// Signal support.
@@ -59,9 +33,26 @@ public class GenericSignal<each T: VariantStorable> {
     }
 
     /// Register this signal with the Godot runtime.
+    // TODO: the signal macro could probably pass in the argument names, so that we could register them as well
     public static func register<C: Object>(_ signalName: String, info: ClassInfo<C>) {
-        let boxed = getProps(repeat (each T).self)
-        info.registerSignal(name: StringName(signalName), arguments: boxed)
+        let arguments = expandArguments(repeat (each T).self)
+        info.registerSignal(name: StringName(signalName), arguments: arguments)
+    }
+
+    /// Expand a list of argument types into a list of PropInfo objects
+    /// Note: it doesn't currently seem to be possible to constrain
+    /// the type of the pack expansion to be ``VariantStorable.Type``, but
+    /// we know that it always will be, so we can force cast it.
+    static func expandArguments<each ArgType>(_ type: repeat each ArgType) -> [PropInfo] {
+        var args = [PropInfo]()
+        var argC = 1
+        for arg in repeat each type {
+            let a = arg as! any VariantStorable.Type
+            args.append(a.propInfo(name: "arg\(argC)"))
+            argC += 1
+
+        }
+        return args
     }
 
     /// Connects the signal to the specified callback
