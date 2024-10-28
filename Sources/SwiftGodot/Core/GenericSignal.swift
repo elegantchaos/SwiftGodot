@@ -13,9 +13,13 @@
 public class GenericSignal<each T: VariantStorable> {
     var target: Object
     var signalName: StringName
-    public init(target: Object, signalName: StringName) {
+    public init(target: Object, signalName: String) {
         self.target = target
-        self.signalName = signalName
+        self.signalName = StringName(signalName)
+    }
+
+    public static func register<C: Object>(_ signalName: String, info: ClassInfo<C>) {
+        print("register \(signalName) here")
     }
 
     /// Connects the signal to the specified callback

@@ -179,9 +179,14 @@ public struct NuSignalMacro: DeclarationMacro {
         return [
             DeclSyntax(
                 try VariableDeclSyntax(
+                    "static let _\(raw: signalName.swiftName) = \(raw: signalWrapperType).self"
+                )
+            ),
+            DeclSyntax(
+                try VariableDeclSyntax(
                     "var \(raw: signalName.swiftName): \(raw: signalWrapperType) { \(raw: signalWrapperType)(target: self, signalName: \"\(raw: signalName.godotName)\") }"
                 )
-            )
+            ),
         ]
     }
 
