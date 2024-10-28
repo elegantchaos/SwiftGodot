@@ -2,6 +2,46 @@
 //  Created by Sam Deane on 25/10/2024.
 //
 
+extension VariantStorable {
+    static func propInfo(name: String) -> PropInfo {
+        let gType = Self.Representable.godotType
+        return PropInfo(
+            propertyType: gType, 
+            propertyName: StringName(name),
+            className: gType == .object ? StringName(String(describing: Self.self)) : "",
+            hint: .none,
+            hintStr: "",
+            usage: .default
+        )
+    }
+}
+
+func getProps<each TT>(_ type: repeat each TT) -> [PropInfo] {
+    var args = [PropInfo]()
+    var argC = 1
+    for arg in repeat each type {
+        if let a = arg as? any VariantStorable.Type {
+            args.append(a.propInfo(name: "arg\(argC)"))
+            // let gType = a.Representable.godotType
+            // args.append(
+            //     PropInfo(
+            //         propertyType: gType, 
+            //         propertyName: "arg\(argC)",
+            //         className: gType == .object ? StringName(String(describing: a.self)) : "",
+            //         hint: .none,
+            //         hintStr: "",
+            //         usage: .default
+            //     )
+            // )
+            argC += 1
+            print("variant")
+        } else {
+            print("not variant")
+        }
+    }
+    return args
+}
+
 /// Signal support.
 /// Use the ``GenericSignal/connect(flags:_:)`` method to connect to the signal on the container object,
 /// and ``GenericSignal/disconnect(_:)`` to drop the connection.
@@ -18,8 +58,10 @@ public class GenericSignal<each T: VariantStorable> {
         self.signalName = StringName(signalName)
     }
 
+    /// Register this signal with the Godot runtime.
     public static func register<C: Object>(_ signalName: String, info: ClassInfo<C>) {
-        print("register \(signalName) here")
+        let boxed = getProps(repeat (each T).self)
+        info.registerSignal(name: StringName(signalName), arguments: boxed)
     }
 
     /// Connects the signal to the specified callback
