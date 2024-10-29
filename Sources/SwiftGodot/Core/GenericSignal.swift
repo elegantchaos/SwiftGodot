@@ -30,8 +30,12 @@ public class GenericSignal<each T: VariantStorable> {
     public func connect(flags: Object.ConnectFlags = [], _ callback: @escaping (_ t: repeat each T) -> Void) -> Object {
         let signalProxy = SignalProxy()
         signalProxy.proxy = { args in
-            let popper = ArgumentPopper(args)
-            callback(repeat popper.pop(as: (each T).self)!)
+            var index = 0
+            do {
+                callback(repeat try args.unpack(as: (each T).self, index: &index))
+            } catch {
+                print("Error unpacking signal arguments: \(error)")
+            }
         }
 
         let callable = Callable(object: signalProxy, method: SignalProxy.proxyName)
@@ -108,17 +112,32 @@ public class SignalProxy: Object {
 /// The simple signal is used to raise signals that take no arguments and return no values.
 public typealias SimpleSignal = GenericSignal< /* no generic arguments */>
 
-/// Internal helper class to pop arguments from the argument list
-class ArgumentPopper {
-    var arguments: [Variant]
-
-    init(_ arguments: borrowing Arguments) {
-        self.arguments = Array(arguments)
+extension Arguments {
+    enum UnpackError: Error {
+        case typeMismatch
+        case missingArgument
     }
 
-    func pop<T: VariantStorable>(as: T.Type) -> T? {
-        let a = arguments.removeFirst()
-        let v = (a.gtype == .object) ? a.asObject() as? T : T(a)
-        return v
+    /// Unpack an argument as a specific type.
+    /// We throw a runtime error if the argument is not of the expected type,
+    /// or if there are not enough arguments to unpack.
+    func unpack<T: VariantStorable>(as type: T.Type, index: inout Int) throws -> T {
+        if index >= count {
+            throw UnpackError.missingArgument
+        }
+        let argument = self[index]
+        index += 1
+        let value: T?
+        if argument.gtype == .object {
+            value = T.Representable.godotType == .object ? argument.asObject(Object.self) as? T : nil
+        } else {
+            value = T(argument)
+        }
+
+        guard let value else {
+            throw UnpackError.typeMismatch
+        }
+
+        return value
     }
 }
