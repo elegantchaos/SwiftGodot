@@ -30,6 +30,9 @@ var products: [Product] = [
             "ExtensionApiJson",
         ]
     ),
+    .plugin(name: "EntryPointGeneratorPlugin", targets: ["EntryPointGeneratorPlugin"]),
+    .plugin(name: "ExtensionBuilderPlugin", targets: ["ExtensionBuilderPlugin"])
+]
 
     .plugin(
         name: "CodeGeneratorPlugin",
@@ -106,6 +109,15 @@ var targets: [Target] = [
         name: "EntryPointGeneratorPlugin",
         capability: .buildTool(),
         dependencies: ["EntryPointGenerator"]
+    ),
+
+    .plugin(
+        name: "ExtensionBuilderPlugin",
+        capability: .command(
+            intent: .custom(
+                verb: "make-extension",
+                description: "Generate a gdextension file for a SwiftGodot library.")
+        )
     ),
 
     // This allows the Swift code to call into the Godot bridge API (GDExtension)
