@@ -511,36 +511,11 @@ func generateClasses (values: [JGodotExtensionAPIClass], outputDir: String?) asy
     }
 }
 
-/// Return the type of a signal's parameters.
-func getGenericSignalType(_ signal: JGodotSignal) -> String {
-    var argTypes: [String] = []
-        for arg in signal.arguments ?? [] {
-        let t = getGodotType(arg)
-        if !t.isEmpty && t != "Variant" {
-            argTypes.append(t)
-        }
-                }
-                
-    return argTypes.isEmpty ? "GenericSignal< /* no args */ >" : "GenericSignal<\(argTypes.joined(separator: ", "))>"
-            }
-        
-/// Return the names of a signal's parameters,
-/// for use in documenting the corresponding lambda.
-func getGenericSignalLambdaArgs(_ signal: JGodotSignal) -> String {
-    var argNames: [String] = []
-        for arg in signal.arguments ?? [] {
-        argNames.append(escapeSwift(snakeToCamel(arg.name)))
-        }
-
-    return argNames.joined(separator: ", ")
-}
-
 func generateSignals (_ p: Printer,
                       cdef: JGodotExtensionAPIClass,
                       signals: [JGodotSignal]) {
     p ("// Signals ")
     var parameterSignals: [JGodotSignal] = []
-    var sidx = 0
     
     for signal in signals {
         let signalProxyType: String
@@ -548,7 +523,6 @@ func generateSignals (_ p: Printer,
         if signal.arguments != nil {
             parameterSignals.append (signal)
             
-            sidx += 1
             signalProxyType = getGenericSignalType(signal)
             lambdaSig = " \(getGenericSignalLambdaArgs(signal)) in"
         } else {
@@ -568,6 +542,30 @@ func generateSignals (_ p: Printer,
         p ("public var \(signalName): \(signalProxyType) { \(signalProxyType) (target: self, signalName: \"\(signal.name)\") }")
         p ("")
     }
+}
+
+/// Return the type of a signal's parameters.
+func getGenericSignalType(_ signal: JGodotSignal) -> String {
+    var argTypes: [String] = []
+    for signalArgument in signal.arguments ?? [] {
+        let godotType = getGodotType(signalArgument)
+        if !godotType.isEmpty && godotType != "Variant" {
+            argTypes.append(godotType)
+        }
+    }
+                
+    return argTypes.isEmpty ? "GenericSignal< /* no args */ >" : "GenericSignal<\(argTypes.joined(separator: ", "))>"
+ }
+        
+/// Return the names of a signal's parameters,
+/// for use in documenting the corresponding lambda.
+func getGenericSignalLambdaArgs(_ signal: JGodotSignal) -> String {
+    var argNames: [String] = []
+    for signalArgument in signal.arguments ?? [] {
+        argNames.append(escapeSwift(snakeToCamel(signalArgument.name)))
+    }
+
+    return argNames.joined(separator: ", ")
 }
 
 func generateSignalDocAppendix (_ p: Printer, cdef: JGodotExtensionAPIClass, signals: [JGodotSignal]?) {
