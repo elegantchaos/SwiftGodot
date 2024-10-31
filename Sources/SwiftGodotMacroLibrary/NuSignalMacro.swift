@@ -1,8 +1,6 @@
-//
-//  SignalMacro.swift
-//  SwiftGodot
-//
-//  Created by Padraig O Cinneide on 2023-10-19.
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+//  Created by Sam Deane on 31/10/24.
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 import Foundation
 import SwiftCompilerPlugin
@@ -11,10 +9,10 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct SignalMacro: DeclarationMacro {
-    
+
+public struct NuSignalMacro: DeclarationMacro {
+
     enum ProviderDiagnostic: Error, DiagnosticMessage {
-        case tooManyArguments
         case argumentsInUnexpectedSyntax
 
         var severity: DiagnosticSeverity { .error }
@@ -23,8 +21,6 @@ public struct SignalMacro: DeclarationMacro {
             switch self {
             case .argumentsInUnexpectedSyntax:
                 "Failed to parse arguments. Define arguments in the form [\"argumentName\": Type.self]"
-            case .tooManyArguments:
-                "Too many arguments in the arguments dictionary. A maximum of 6 are supported."
             }
         }
 
@@ -32,15 +28,15 @@ public struct SignalMacro: DeclarationMacro {
             MessageID(domain: "SwiftGodotMacros", id: message)
         }
     }
-    
+
     public static func expansion(
         of node: some SwiftSyntax.FreestandingMacroExpansionSyntax,
         in context: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.DeclSyntax] {
-        
+
         var signalName: SignalName? = nil
         var arguments = [(name: String, type: String)]()
-        
+
         for (index, argument) in node.arguments.enumerated() {
             if index == 0 {
                 signalName = argument.expression.signalName()
@@ -50,20 +46,20 @@ public struct SignalMacro: DeclarationMacro {
                     // its an empty dictionary, so no arguments
                     continue
                 }
-                
+
                 guard let dictSyntax = DictionaryExprSyntax(argument.expression) else {
                     throw ProviderDiagnostic.argumentsInUnexpectedSyntax
                 }
-                
+
                 if case .colon = dictSyntax.content {
                     // its an empty dictionary, so no arguments
                     continue
                 }
-                
+
                 guard let pairList = DictionaryElementListSyntax(dictSyntax.content) else {
                     throw ProviderDiagnostic.argumentsInUnexpectedSyntax
                 }
-                
+
                 for pair in pairList {
                     guard let typeName = pair.value.typeName() else {
                         throw ProviderDiagnostic.argumentsInUnexpectedSyntax
@@ -72,41 +68,25 @@ public struct SignalMacro: DeclarationMacro {
                 }
             }
         }
-        
+
         guard let signalName else { return [] }
-        
+
         let genericTypeList = arguments.map { $0.type }.joined(separator: ", ")
-        
-        let signalWrapperType = switch arguments.count {
-        case 0: "SignalWithNoArguments"
-        case 1: "SignalWith1Argument<\(genericTypeList)>"
-        case 2: "SignalWith2Arguments<\(genericTypeList)>"
-        case 3: "SignalWith3Arguments<\(genericTypeList)>"
-        case 4: "SignalWith4Arguments<\(genericTypeList)>"
-        case 5: "SignalWith5Arguments<\(genericTypeList)>"
-        case 6: "SignalWith6Arguments<\(genericTypeList)>"
-        default:
-            throw ProviderDiagnostic.tooManyArguments
-        }
-        
-        let argumentList = ["\"" + signalName.godotName + "\""] + arguments
-            .enumerated()
-            .map { index, argument in
-                "argument\(index + 1)Name: \(argument.name)"
-            }
-            
-        let argumentsString = argumentList.joined(separator: ", ")
-        
+
+        let signalWrapperType = arguments.isEmpty ? "GenericSignal< /* no args */ >" : "GenericSignal<\(genericTypeList)>"
+
         return [
             DeclSyntax(
                 try VariableDeclSyntax(
-                "static let \(raw: signalName.swiftName) = \(raw: signalWrapperType)(\(raw: argumentsString))"
+                    "static let _\(raw: signalName.swiftName) = \(raw: signalWrapperType).self"
                 )
-            )
+            ),
+            DeclSyntax(
+                try VariableDeclSyntax(
+                    "var \(raw: signalName.swiftName): \(raw: signalWrapperType) { \(raw: signalWrapperType)(target: self, signalName: \"\(raw: signalName.godotName)\") }"
+                )
+            ),
         ]
     }
-    
+
 }
-
-
-
