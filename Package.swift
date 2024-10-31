@@ -35,7 +35,8 @@ var products: [Product] = [
             "ExtensionApiJson"
         ]),
     .plugin(name: "CodeGeneratorPlugin", targets: ["CodeGeneratorPlugin"]),
-    .plugin(name: "EntryPointGeneratorPlugin", targets: ["EntryPointGeneratorPlugin"])
+    .plugin(name: "EntryPointGeneratorPlugin", targets: ["EntryPointGeneratorPlugin"]),
+    .plugin(name: "ExtensionBuilderPlugin", targets: ["ExtensionBuilderPlugin"])
 ]
 
 // Macros aren't supported on Windows before 5.9.1 and this sample uses them
@@ -106,7 +107,16 @@ var targets: [Target] = [
             capability: .buildTool(),
             dependencies: ["EntryPointGenerator"]
         ),
-    
+
+        .plugin(
+            name: "ExtensionBuilderPlugin",
+            capability: .command(
+                intent: .custom(
+                    verb: "make-extension",
+                    description: "Generate a gdextension file for a SwiftGodot library.")
+            )
+        ),
+
     // This allows the Swift code to call into the Godot bridge API (GDExtension)
     .target(
         name: "GDExtension"),
