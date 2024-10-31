@@ -521,7 +521,7 @@ func getGenericSignalType(_ signal: JGodotSignal) -> String {
         }
                 }
                 
-    return argTypes.isEmpty ? "SimpleSignal" : "GenericSignal<\(argTypes.joined(separator: ", "))>"
+    return argTypes.isEmpty ? "GenericSignal< /* no args */ >" : "GenericSignal<\(argTypes.joined(separator: ", "))>"
             }
         
 /// Return the names of a signal's parameters,
@@ -552,7 +552,7 @@ func generateSignals (_ p: Printer,
             signalProxyType = getGenericSignalType(signal)
             lambdaSig = " \(getGenericSignalLambdaArgs(signal)) in"
         } else {
-            signalProxyType = "SimpleSignal"
+            signalProxyType = "GenericSignal< /* no args */ >"
             lambdaSig = ""
         }
         let signalName = godotMethodToSwift (signal.name)

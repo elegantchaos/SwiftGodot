@@ -46,6 +46,3 @@ public class SignalProxy: Object {
         return nil
     }
 }
-
-/// The simple signal is used to raise signals that take no arguments and return no values.
-public typealias SimpleSignal = GenericSignal< /* no generic arguments */>
