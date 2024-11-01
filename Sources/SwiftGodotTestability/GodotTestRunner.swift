@@ -4,8 +4,6 @@
 
 import XCTest
 
-@testable import SwiftGodot
-
 /// Test case which runs all the other tests from within the Godot runtime.
 /// It doesn't actually matter when this suite is run, but we name it with
 /// __ to try to make it run first, since `swift test` seems to run test
