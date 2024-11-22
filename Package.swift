@@ -185,10 +185,18 @@ var targets: [Target] = [
     /// 3. Use `scripts/make-libgodot.framework` to build an `xcframework` and put it at the root of your SwiftGodot work tree.
     /// 4. Change `#if true` to `#if false` below.
     ///
-    let libgodot_tests = Target.binaryTarget(
-        name: "libgodot_tests",
-        path: "../Frameworks/macOS/libgodot.xcframework"
-    )
+    #if true
+        let libgodot_tests = Target.binaryTarget(
+            name: "libgodot_tests",
+            url: "https://github.com/migueldeicaza/SwiftGodotKit/releases/download/4.3.5/libgodot.xcframework.zip",
+            checksum: "865ea17ad3e20caab05b3beda35061f57143c4acf0e4ad2684ddafdcc6c4f199"
+        )
+    #else
+        let libgodot_tests = Target.binaryTarget(
+            name: "libgodot_tests",
+            path: "libgodot.xcframework"
+        )
+    #endif
 
     targets.append(contentsOf: [
         // Godot runtime as a library
