@@ -3,9 +3,9 @@ import Foundation
 /// Basic implementation of a config file parser.
 /// This probably exists somewhere already!
 class GodotConfigFile {
-    static let sectionPattern: Regex = #/\s*\[(?<section>\w+)\]\s*/#
-    static let assignmentPattern: Regex = #/\s*(?<key>\S+)\s*=\s*(?<value>.*)\s*/#
-    static let stringPattern: Regex = #/"(?<content>.*)"/#
+    let sectionPattern: Regex = #/\s*\[(?<section>\w+)\]\s*/#
+    let assignmentPattern: Regex = #/\s*(?<key>\S+)\s*=\s*(?<value>.*)\s*/#
+    let stringPattern: Regex = #/"(?<content>.*)"/#
 
     var content: [String: [String: String]]
     var sections: [String]
@@ -30,11 +30,11 @@ class GodotConfigFile {
         }
 
         for try await line in url.lines {
-            if let match = line.matches(of: Self.sectionPattern).first {
+            if let match = line.matches(of: sectionPattern).first {
                 endSection()
                 section = String(match.section)
                 values = [:]
-            } else if let match = line.matches(of: Self.assignmentPattern).first {
+            } else if let match = line.matches(of: assignmentPattern).first {
                 values[String(match.key)] = String(match.value)
             }
         }
@@ -74,7 +74,7 @@ class GodotConfigFile {
     /// Get a string value from a section.
     func get(_ key: String, section: String) -> String? {
         if let entry = content[section]?[key],
-            let value = entry.matches(of: Self.stringPattern).first
+            let value = entry.matches(of: stringPattern).first
         {
             return String(value.content)
         }
