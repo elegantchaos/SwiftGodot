@@ -19,15 +19,15 @@ import PackagePlugin
 
         // Iterate over the targets we've been asked to format.
         for target in targets {
-            guard let target = target as? SwiftSourceModuleTarget, target.kind == .generic else { 
+            guard let target = target as? SwiftSourceModuleTarget, target.kind == .generic else {
                 Diagnostics.remark("Skipping \(target.name).")
-                continue 
-                }
+                continue
+            }
 
             let name = target.moduleName
 
             // read existing settings or make stubs
-            let url = URL(fileURLWithPath: context.package.directory.appending("\(name).gdextension").string)
+            let url = context.package.directoryURL.appending(path: "\(name).gdextension")
             let settings: GodotConfigFile
             do {
                 settings = try await GodotConfigFile(url)
@@ -50,17 +50,17 @@ import PackagePlugin
             // extract the artifacts if the build succeeded
             if result.succeeded {
                 for artifact in result.builtArtifacts.filter({ $0.kind != .executable }) {
-                    settings.set("macos.debug", artifact.path.string, section: "libraries")
-                    settings.set("macos.release", artifact.path.string.replacing("debug", with: "release"), section: "libraries")
+                    settings.set("macos.debug", artifact.url.path, section: "libraries")
+                    settings.set("macos.release", artifact.url.path.replacing("debug", with: "release"), section: "libraries")
 
                     // TODO: add support for other platforms
-                    let libGodotPath = artifact.path.string.replacing(name, with: "SwiftGodot")
+                    let libGodotPath = artifact.url.path.replacing(name, with: "SwiftGodot")
 
                     settings.set("macos.debug", [libGodotPath: ""], section: "dependencies")
                     settings.set("macos.release", [libGodotPath.replacing("debug", with: "release"): ""], section: "dependencies")
 
                     // TODO: add correct dependencies for other platforms
-                    print("Updated paths for \(artifact.path.string).")
+                    print("Updated paths for \(artifact.url.path).")
 
                 }
             } else {
@@ -73,26 +73,26 @@ import PackagePlugin
     }
 
     func dump(_ target: SwiftSourceModuleTarget) {
-            for lib in target.linkedLibraries {
-                print(lib)
-            }
+        for lib in target.linkedLibraries {
+            print(lib)
+        }
 
-            for f in target.linkedFrameworks {
-                print(f)
-            }
+        for f in target.linkedFrameworks {
+            print(f)
+        }
 
-            for dep in target.dependencies {
-                switch dep {
-                case .target(let t):
+        for dep in target.dependencies {
+            switch dep {
+            case .target(let t):
                 print(t)
                 if let t = t as? SwiftSourceModuleTarget {
                     dump(t)
                 }
-                case .product(let p):
+            case .product(let p):
                 print(p.name)
-                default: 
+            default:
                 print(dep)
-                }
             }
+        }
     }
 }
