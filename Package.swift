@@ -1,16 +1,7 @@
 // swift-tools-version: 6.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import CompilerPluginSupport
 import PackageDescription
-
-//var linkerSettings: [LinkerSetting] = []
-//#if os(macOS)
-//linkerSettings.append(.unsafeFlags([
-//    "-Xlinker", "-undefined",
-//    "-Xlinker", "dynamic_lookup",
-//]))
-//#endif
 
 var libraryType: Product.Library.LibraryType
 #if os(Windows)
@@ -24,34 +15,43 @@ var products: [Product] = [
     .library(
         name: "SwiftGodot",
         type: libraryType,
-        targets: ["SwiftGodot"]),
+        targets: ["SwiftGodot"]
+    ),
+
     .library(
         name: "SwiftGodotStatic",
-        targets: ["SwiftGodot"]),
+        targets: ["SwiftGodot"]
+    ),
+
     .library(
         name: "ExtensionApi",
         targets: [
             "ExtensionApi",
             "ExtensionApiJson",
-        ]),
-    .plugin(name: "CodeGeneratorPlugin", targets: ["CodeGeneratorPlugin"]),
-    .plugin(name: "EntryPointGeneratorPlugin", targets: ["EntryPointGeneratorPlugin"]),
-    .plugin(name: "ExtensionBuilderPlugin", targets: ["ExtensionBuilderPlugin"]),
-]
+        ]
+    ),
 
-products.append(
+    .plugin(
+        name: "CodeGeneratorPlugin",
+        targets: ["CodeGeneratorPlugin"]
+    ),
+
+    .plugin(
+        name: "EntryPointGeneratorPlugin",
+        targets: ["EntryPointGeneratorPlugin"]
+    ),
+
+    .plugin(
+        name: "ExtensionBuilderPlugin",
+        targets: ["ExtensionBuilderPlugin"]
+    ),
+
     .library(
         name: "SimpleExtension",
         type: libraryType,
-        targets: ["SimpleExtension"]))
-
-// libgodot is only available for macOS and testability runtime depends on it
-#if os(macOS)
-    products.append(
-        .library(
-            name: "SwiftGodotTestability",
-            targets: ["SwiftGodotTestability"]))
-#endif
+        targets: ["SimpleExtension"]
+    ),
+]
 
 var targets: [Target] = [
     .executableTarget(
@@ -63,12 +63,14 @@ var targets: [Target] = [
         ],
         swiftSettings: [.swiftLanguageMode(.v5)]
     ),
+
     // This contains GDExtension's JSON API data models
     .target(
         name: "ExtensionApi",
         exclude: ["ExtensionApiJson.swift", "extension_api.json"],
         swiftSettings: [.swiftLanguageMode(.v5)]
     ),
+
     // This contains a resource bundle with extension_api.json
     .target(
         name: "ExtensionApiJson",
@@ -125,11 +127,7 @@ var targets: [Target] = [
         name: "GDExtension",
         swiftSettings: [.swiftLanguageMode(.v5)]
     ),
-]
 
-var swiftGodotPlugins: [Target.PluginUsage] = ["CodeGeneratorPlugin"]
-
-targets.append(contentsOf: [
     // These are macros that can be used by third parties to simplify their
     // SwiftGodot development experience, these are used at compile time by
     // third party projects
@@ -150,8 +148,32 @@ targets.append(contentsOf: [
         swiftSettings: [.swiftLanguageMode(.v5)]
     ),
     //linkerSettings: linkerSettings),
-])
-swiftGodotPlugins.append("SwiftGodotMacroLibrary")
+
+    // This is the binding itself, it is made up of our generated code for the
+    // Godot API, supporting infrastructure and extensions to the API to provide
+    // a better Swift experience
+    .target(
+        name: "SwiftGodot",
+        dependencies: ["GDExtension"],
+        //linkerSettings: linkerSettings,
+        swiftSettings: [
+            .swiftLanguageMode(.v5),
+            .define("CUSTOM_BUILTIN_IMPLEMENTATIONS"),
+        ],
+        plugins: ["CodeGeneratorPlugin", "SwiftGodotMacroLibrary"]
+    ),
+
+    // General purpose cross-platform tests
+    .testTarget(
+        name: "SwiftGodotUniversalTests",
+        dependencies: [
+            "SwiftGodot",
+            "ExtensionApi",
+            "ExtensionApiJson",
+        ],
+        swiftSettings: [.swiftLanguageMode(.v5)]
+    ),
+]
 
 // Macro tests don't work on Windows yet
 #if !os(Windows)
@@ -168,9 +190,8 @@ swiftGodotPlugins.append("SwiftGodotMacroLibrary")
         ))
 #endif
 
-// libgodot is only available for macOS
+// libgodot is only available for macOS and testability runtime depends on it
 #if os(macOS)
-
     /// You might want to build your own libgodot, so you can step into it in the debugger when fixing failing tests. Here's how:
     ///
     /// 1. Check out the appropriate branch of https://github.com/migueldeicaza/libgodot
@@ -217,34 +238,13 @@ swiftGodotPlugins.append("SwiftGodotMacroLibrary")
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ])
+
+    products.append(
+        .library(
+            name: "SwiftGodotTestability",
+            targets: ["SwiftGodotTestability"]))
+
 #endif
-
-targets.append(contentsOf: [
-    // This is the binding itself, it is made up of our generated code for the
-    // Godot API, supporting infrastructure and extensions to the API to provide
-    // a better Swift experience
-    .target(
-        name: "SwiftGodot",
-        dependencies: ["GDExtension"],
-        //linkerSettings: linkerSettings,
-        swiftSettings: [
-            .swiftLanguageMode(.v5),
-            .define("CUSTOM_BUILTIN_IMPLEMENTATIONS"),
-        ],
-        plugins: swiftGodotPlugins
-    ),
-
-    // General purpose cross-platform tests
-    .testTarget(
-        name: "SwiftGodotUniversalTests",
-        dependencies: [
-            "SwiftGodot",
-            "ExtensionApi",
-            "ExtensionApiJson",
-        ],
-        swiftSettings: [.swiftLanguageMode(.v5)]
-    ),
-])
 
 let package = Package(
     name: "SwiftGodot",
