@@ -32,11 +32,6 @@ var products: [Product] = [
     ),
 
     .plugin(
-        name: "CodeGeneratorPlugin",
-        targets: ["CodeGeneratorPlugin"]
-    ),
-
-    .plugin(
         name: "EntryPointGeneratorPlugin",
         targets: ["EntryPointGeneratorPlugin"]
     ),
@@ -94,14 +89,6 @@ var targets: [Target] = [
         ]
     ),
 
-    // This is a build-time plugin that invokes the generator and produces
-    // the bindings that are compiled into SwiftGodot
-    .plugin(
-        name: "CodeGeneratorPlugin",
-        capability: .buildTool(),
-        dependencies: ["Generator"]
-    ),
-
     .plugin(
         name: "EntryPointGeneratorPlugin",
         capability: .buildTool(),
@@ -146,7 +133,7 @@ var targets: [Target] = [
             .swiftLanguageMode(.v5),
             .define("CUSTOM_BUILTIN_IMPLEMENTATIONS"),
         ],
-        plugins: ["CodeGeneratorPlugin", "SwiftGodotMacroLibrary"]
+        plugins: ["SwiftGodotMacroLibrary"]
     ),
 
     // General purpose cross-platform tests
