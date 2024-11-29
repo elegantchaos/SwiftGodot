@@ -1,7 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 .DS_Store
-/.build
+.build
 /.index-build
 /Packages
 /*.xcodeproj
@@ -19,4 +19,3 @@ build-docs.log
 Package.resolved
 /.vscode
 .swiftpm/xcode/xcshareddata/xcschemes
-GeneratedForDebug/
