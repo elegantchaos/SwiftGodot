@@ -50,7 +50,7 @@ final class SignalTests: GodotTestCase {
         node.ready.connect {
             signalReceived = true
         }
-        node.emitSignal("ready")
+        node.ready.emit()
         XCTAssertTrue (signalReceived, "signal should have been received")
     }
     
@@ -61,7 +61,7 @@ final class SignalTests: GodotTestCase {
             signalReceived = true
             XCTAssertEqual(node, nodeParameter)
         }
-        node.emitSignal("child_exiting_tree", Variant(node))
+        node.childExitingTree.emit(node)
         XCTAssertTrue (signalReceived, "signal should have been received")
     }
     
@@ -74,7 +74,7 @@ final class SignalTests: GodotTestCase {
             XCTAssertEqual(oldName, "old name")
             XCTAssertEqual(newName, "new name")
         }
-        node.emitSignal("animation_node_renamed", Variant(123), Variant("old name"), Variant("new name"))
+        node.animationNodeRenamed.emit(123, "old name", "new name")
         XCTAssertTrue (signalReceived, "signal should have been received")
     }
 }
