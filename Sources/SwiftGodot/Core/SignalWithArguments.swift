@@ -77,6 +77,20 @@ public class SignalWithArguments<each T: VariantStorable> {
     /// Emit the signal (with required arguments, if there are any)
     @discardableResult /* discardable per discardableList: Object, emit_signal */
     public func emit(_ t: repeat each T) -> GodotError {
+        // NOTE:
+        // Ideally we should be able to expand the arguments and pass them
+        // into a call to the native emitSignal; something like this:
+        //   emitSignal(signalName, repeat Variant(each t))
+        //
+        // Unfortunately, expanding arguments as opposed to types
+        // (t, as opposed to T), doesn't seem to support this pattern.
+        //
+        // The only thing we can do with them is iterate them,
+        // which means that we can build up an array of them, but then
+        // we need an alterative form of emitSignal that takes its arguments
+        // as an array rather than as variadically.
+        //
+        // This variant is defined in RawCall.swift - but I wonder if there's a better way?
         var args = [Variant(signalName)]
         for arg in repeat each t {
             args.append(Variant(arg))
