@@ -217,7 +217,7 @@ class GodotMacroProcessor {
             try processGArrayCollectionVariable(varDecl, prefix: previousSubgroupPrefix ?? previousGroupPrefix)
         } else if hasExportAttribute(varDecl.attributes) {
             return try processExportVariable(varDecl, prefix: previousSubgroupPrefix ?? previousGroupPrefix)
-        } else if hasSignalAttachmentAttribute(varDecl.attributes) {
+        } else if hasSignalAttribute(varDecl.attributes) {
             try processSignalVariable(varDecl, prefix: previousSubgroupPrefix ?? previousGroupPrefix)
         }
             
@@ -245,6 +245,11 @@ class GodotMacroProcessor {
         guard let typeName = type.as (IdentifierTypeSyntax.self)?.name.text else {
             throw GodotMacroError.unsupportedType(varDecl)
         }
+
+        guard let ta = last.typeAnnotation?.type.description.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) else {
+            throw GodotMacroError.noTypeFound(varDecl)
+        }
+
         let exportAttr = varDecl.attributes.first?.as(AttributeSyntax.self)
         let labeledExpressionList = exportAttr?.arguments?.as(LabeledExprListSyntax.self)
         let firstLabeledExpression = labeledExpressionList?.first?.expression.as(MemberAccessExprSyntax.self)?.declName
@@ -253,12 +258,6 @@ class GodotMacroProcessor {
         for singleVar in varDecl.bindings {
             guard let ips = singleVar.pattern.as(IdentifierPatternSyntax.self) else {
                 throw GodotMacroError.expectedIdentifier(singleVar)
-            }
-            guard let last = varDecl.bindings.last else {
-                throw GodotMacroError.noVariablesFound
-            }
-            guard let ta = last.typeAnnotation?.type.description.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) else {
-                throw GodotMacroError.noTypeFound(varDecl)
             }
             
             let varNameWithPrefix = ips.identifier.text
@@ -489,11 +488,13 @@ class GodotMacroProcessor {
             } else if let funcDecl = FunctionDeclSyntax(decl) {
                 try processFunction (funcDecl)
             } else if let varDecl = VariableDeclSyntax(decl) {
-                try needTrycase = needTrycase || processVariable(
+                if try processVariable(
                     varDecl,
                     previousGroupPrefix: previousGroupPrefix,
                     previousSubgroupPrefix: previousSubgroupPrefix
-                )
+                ) {
+                    needTrycase = true
+                }
             } else if let macroExpansion {
                 try classInitSignals(macroExpansion)
             }
