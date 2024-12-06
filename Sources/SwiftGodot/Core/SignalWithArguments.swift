@@ -2,32 +2,18 @@
 //  Created by Sam Deane on 25/10/2024.
 //
 
-extension VariantStorable {
-    static func propInfo(name: String) -> PropInfo {
-        let gType = Self.Representable.godotType
-        return PropInfo(
-            propertyType: gType,
-            propertyName: StringName(name),
-            className: gType == .object ? StringName(String(describing: Self.self)) : "",
-            hint: .none,
-            hintStr: "",
-            usage: .default
-        )
-    }
-}
-
-public typealias SignalWithArguments = GenericSignal
-public typealias SimpleSignal = GenericSignal< /* no args */ >
+/// Simple signal without arguments.
+public typealias SimpleSignal = SignalWithArguments< /* no args */ >
 
 /// Signal support.
-/// Use the ``GenericSignal/connect(flags:_:)`` method to connect to the signal on the container object,
-/// and ``GenericSignal/disconnect(_:)`` to drop the connection.
+/// Use the ``SignalWithArguments/connect(flags:_:)`` method to connect to the signal on the container object,
+/// and ``SignalWithArguments/disconnect(_:)`` to drop the connection.
 ///
-/// Use the ``GenericSignal/emit(...)`` method to emit a signal.
+/// Use the ``SignalWithArguments/emit(...)`` method to emit a signal.
 ///
 /// You can also await the ``Signal1/emitted`` property for waiting for a single emission of the signal.
 ///
-public class GenericSignal<each T: VariantStorable> {
+public class SignalWithArguments<each T: VariantStorable> {
     var target: Object
     var signalName: StringName
     public init(target: Object, signalName: String) {
