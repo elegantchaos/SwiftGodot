@@ -6,12 +6,10 @@
 public typealias SimpleSignal = SignalWithArguments< /* no args */ >
 
 /// Signal support.
-/// Use the ``SignalWithArguments/connect(flags:_:)`` method to connect to the signal on the container object,
-/// and ``SignalWithArguments/disconnect(_:)`` to drop the connection.
-///
-/// Use the ``SignalWithArguments/emit(...)`` method to emit a signal.
-///
-/// You can also await the ``Signal1/emitted`` property for waiting for a single emission of the signal.
+/// Use the ``connect(flags:_:)`` method to connect to the signal on the container object,
+/// and ``disconnect(_:)`` to drop the connection.
+/// Use the ``emit(...)`` method to emit a signal.
+/// You can also await the ``emitted`` property for waiting for a single emission of the signal.
 ///
 public class SignalWithArguments<each T: VariantStorable> {
     var target: Object
@@ -22,7 +20,7 @@ public class SignalWithArguments<each T: VariantStorable> {
     }
 
     /// Register this signal with the Godot runtime.
-    // TODO: the signal macro could probably pass in the argument names, so that we could register them as well
+    // TODO: the @Signal macro could optionally accept a list of argument names, so that we could register them as well.
     public static func register<C: Object>(_ signalName: String, info: ClassInfo<C>) {
         let arguments = expandArguments(repeat (each T).self)
         info.registerSignal(name: StringName(signalName), arguments: arguments)
@@ -83,7 +81,7 @@ public class SignalWithArguments<each T: VariantStorable> {
         for arg in repeat each t {
             args.append(Variant(arg))
         }
-        let result = target.emitSignalWithArguments(args)
+        let result = target.emitSignal(args)
         guard let result else { return .ok }
         guard let errorCode = Int(result) else { return .ok }
         return GodotError(rawValue: Int64(errorCode))!

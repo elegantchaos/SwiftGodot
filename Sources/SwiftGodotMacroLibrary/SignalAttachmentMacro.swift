@@ -22,7 +22,7 @@ public struct SignalAttachmentMacro: AccessorMacro {
                 case .invalidDeclaration:
                     "Signal can only be applied to stored properties"
                 case .missingTypeAnnotation:
-                    "Signal requires an explicit type declaration of SimpleSignal or SignalWithArguments<A1, A2...>"
+                    "Signal requires an explicit type declaration of SimpleSignal or SignalWithArguments<...>"
             }
         }
         

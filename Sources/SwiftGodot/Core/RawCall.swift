@@ -38,7 +38,7 @@ extension Object {
 
     /// Non-variadic variation on the emitSignal method.
     /// Used by SignalWithArguments.
-    public final func emitSignalWithArguments(_ arguments: [Variant]) -> Variant? {
+    public final func emitSignal(_ arguments: [Variant]) -> Variant? {
         return rawCall(Object.method_emit_signal, arguments: arguments)
     }
 

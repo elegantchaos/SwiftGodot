@@ -489,8 +489,8 @@ func generateSignals (_ p: Printer,
         if signal.arguments != nil {
             parameterSignals.append (signal)
             
-            signalProxyType = getSignalWithArgumentsType(signal)
-            lambdaSig = " \(getSignalWithArgumentsLambdaArgs(signal)) in"
+            signalProxyType = getSignalType(signal)
+            lambdaSig = " \(getSignalLambdaArgs(signal)) in"
         } else {
             signalProxyType = "SimpleSignal"
             lambdaSig = ""
@@ -511,7 +511,7 @@ func generateSignals (_ p: Printer,
 }
 
 /// Return the type of a signal's parameters.
-func getSignalWithArgumentsType(_ signal: JGodotSignal) -> String {
+func getSignalType(_ signal: JGodotSignal) -> String {
     var argTypes: [String] = []
     for signalArgument in signal.arguments ?? [] {
         let godotType = getGodotType(signalArgument)
@@ -529,7 +529,7 @@ func getSignalWithArgumentsType(_ signal: JGodotSignal) -> String {
         
 /// Return the names of a signal's parameters,
 /// for use in documenting the corresponding lambda.
-func getSignalWithArgumentsLambdaArgs(_ signal: JGodotSignal) -> String {
+func getSignalLambdaArgs(_ signal: JGodotSignal) -> String {
     var argNames: [String] = []
     for signalArgument in signal.arguments ?? [] {
         argNames.append(escapeSwift(snakeToCamel(signalArgument.name)))
