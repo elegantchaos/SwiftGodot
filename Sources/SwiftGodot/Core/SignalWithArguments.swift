@@ -3,7 +3,7 @@
 //
 
 /// Simple signal without arguments.
-public typealias SimpleSignal = SignalWithArguments< /* no args */ >
+public typealias SimpleSignal = SignalWithArguments< /* no args */>
 
 /// Signal support.
 /// Use the ``connect(flags:_:)`` method to connect to the signal on the container object,
@@ -86,16 +86,14 @@ public class SignalWithArguments<each T: VariantStorable> {
         // (t, as opposed to T), doesn't seem to support this pattern.
         //
         // The only thing we can do with them is iterate them,
-        // which means that we can build up an array of them, but then
-        // we need an alterative form of emitSignal that takes its arguments
-        // as an array rather than as variadically.
-        //
-        // This variant is defined in RawCall.swift - but I wonder if there's a better way?
-        var args = [Variant(signalName)]
+        // which means that we can build up an array of them, so we
+        // then use callv to call the emit_signal method.
+        let args = GArray()
+        args.append(Variant(signalName))
         for arg in repeat each t {
             args.append(Variant(arg))
         }
-        let result = target.emitSignal(args)
+        let result = target.callv(method: "emit_signal", argArray: args)
         guard let result else { return .ok }
         guard let errorCode = Int(result) else { return .ok }
         return GodotError(rawValue: Int64(errorCode))!
@@ -122,23 +120,23 @@ extension Arguments {
     enum UnpackError: Error {
         /// The argument could not be coerced to the expected type.
         case typeMismatch
-        
+
         /// The argument was nil.
         case nilArgument
     }
-    
+
     /// Unpack an argument as a specific type.
     /// We throw a runtime error if the argument is not of the expected type,
     /// or if there are not enough arguments to unpack.
     func unwrap<T: VariantStorable>(ofType type: T.Type, index: inout Int) throws -> T {
         let argument = try optionalVariantArgument(at: index)
         index += 1
-        
+
         // if the argument was nil, throw error
         guard let argument else {
             throw UnpackError.nilArgument
         }
-        
+
         // NOTE:
         // Ideally we could just call T.unpack(from: argument) here.
         // Unfortunately, T.unpack is dispatched statically, but we don't
@@ -146,7 +144,7 @@ extension Arguments {
         // The only thing we know about type T is that it conforms to VariantStorable.
         // We don't know if inherits from Object, so the compiler will always pick the
         // default non-object implementation of T.unpack.
-        
+
         // try to unpack the variant as the expected type
         let value: T?
         if (argument.gtype == .object) && (T.Representable.godotType == .object) {
@@ -154,11 +152,11 @@ extension Arguments {
         } else {
             value = T(argument)
         }
-        
+
         guard let value else {
             throw UnpackError.typeMismatch
         }
-        
+
         return value
     }
 }
