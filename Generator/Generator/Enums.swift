@@ -90,7 +90,7 @@ func generateEnums (_ p: Printer, cdef: JClassInfo?, values: [JGodotGlobalEnumEl
         }
         let extraConformances = enumDefName == "Error" ? ", Error" : ""
         
-        p ("public enum \(getGodotType (SimpleType (type: enumDefName))): Int64, CaseIterable, CustomDebugStringConvertible\(extraConformances)") {
+        p ("public enum \(getGodotType (SimpleType (type: enumDefName))): Int64, GodotEnum\(extraConformances)") {
             var used = Set<Int> ()
             
             func getName (_ enumVal: JGodotValueElement) -> String? {
