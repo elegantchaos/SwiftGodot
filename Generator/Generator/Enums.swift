@@ -104,7 +104,6 @@ func generateEnums (_ p: Printer, cdef: JClassInfo?, values: [JGodotGlobalEnumEl
                 return snakeToCamel(enumVal.name.dropPrefix(enumCasePrefix))
             }
 
-            var debugLines: [String] = []
             for enumVal in enumDef.values {
                 if droppedCases.contains("\(enumDef.name).\(enumVal.name)") {
                     continue
@@ -125,20 +124,8 @@ func generateEnums (_ p: Printer, cdef: JClassInfo?, values: [JGodotGlobalEnumEl
                     p("/// This case resurfaces during internal bridging of some operators and you will never encounter it")
                 }
                 p ("\(prefix)case \(enumName) = \(enumVal.value) // \(enumVal.name)")
-
-                if prefix == "" {
-                    debugLines.append ("case .\(enumName): return \".\(enumName)\"")
-                }
             }
             
-            p ("/// A textual representation of this instance, suitable for debugging")
-            p ("public var debugDescription: String") {
-                p ("switch self") {
-                    for line in debugLines {
-                        p (line)
-                    }
-                }
-            }
             if enumDefName == "Error" {
                 /// Provides the description of the error.
                 p ("public var localizedDescription: String { GD.errorString(error: self.rawValue) }")
