@@ -23,7 +23,7 @@ public protocol ExtensionInterface {
 
 }
 
-public class LibGodotExtensionInterface: ExtensionInterface {
+private class LibGodotExtensionInterface: ExtensionInterface {
 
     /// If your application is crashing due to the Variant leak fixes, please
     /// enable this flag, and provide me with a test case, so I can find that
