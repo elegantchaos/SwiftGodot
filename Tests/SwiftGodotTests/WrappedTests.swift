@@ -67,10 +67,10 @@ final class DuplicateClassRegistrationTests: GodotTestCase {
         register(type: DuplicateClassTestNode.self)
         defer { unregister(type: DuplicateClassTestNode.self) }
 
-        let old = Testing.ClassNames.setDuplicateNameCallback { [weak self] name, type in
+        let old = Wrapped.Testing.ClassNames.setDuplicateNameCallback { [weak self] name, type in
             self?.duplicateClassNames.append(name)
         }
-        defer { _ = Testing.ClassNames.setDuplicateNameCallback(old) }
+        defer { _ = Wrapped.Testing.ClassNames.setDuplicateNameCallback(old) }
 
         register(type: DuplicateClassTestNode.self)
 

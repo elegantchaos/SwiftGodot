@@ -33,7 +33,7 @@ open class GodotTestCase: EmbeddedTestCase<GodotTestHost> {
     override open func tearDown() async throws {
         if GodotRuntime.isRunning {
             // clean up test objects
-            let liveObjects = Testing.LiveObjects.all
+            let liveObjects = Wrapped.Testing.LiveObjects.all
             for liveObject in liveObjects {
                 switch liveObject {
                 case let node as Node:
@@ -46,7 +46,7 @@ open class GodotTestCase: EmbeddedTestCase<GodotTestHost> {
                     print("Unable to free \(liveObject)")
                 }
             }
-            Testing.LiveObjects.reset()
+            Wrapped.Testing.LiveObjects.reset()
 
             // waiting for queueFree to take effect
             let scene = try GodotRuntime.getScene()
