@@ -454,12 +454,14 @@ func withArgPointers(_ _args: UnsafeMutableRawPointer?..., body: ([UnsafeRawPoin
   body(unsafeBitCast(_args, to: [UnsafeRawPointer?].self))
 }
 
-public func setExtensionInterfaceOpaque(library libraryPtr: UnsafeMutableRawPointer, getProcAddrFun godotGetProcAddr: Any) {
-    let interface = LibGodotExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr as! GDExtensionInterfaceGetProcAddress)
-    setExtensionInterface(interface: interface)
+public extension ExtensionInterface {
+    /// Create an interface instance from the raw pointers provided by Godot.
+    static func rawInterace(library libraryPtr: UnsafeMutableRawPointer, getProcAddrFun godotGetProcAddr: Any) -> ExtensionInterface {
+        let procAddrTyped = unsafeBitCast(godotGetProcAddr, to: GDExtensionInterfaceGetProcAddress.self)
+        let libraryTyped = GDExtensionClassLibraryPtr(libraryPtr)
+        return LibGodotExtensionInterface(library: libraryTyped, getProcAddrFun: procAddrTyped)
+    }
 }
-
-
 
 #if os(Windows)
 typealias RawType = Int32

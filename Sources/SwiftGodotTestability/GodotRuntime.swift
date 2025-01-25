@@ -59,7 +59,7 @@ private extension GodotRuntime {
                 guard let godotGetProcAddr, let libraryPtr else {
                     return 0
                 }
-                setExtensionInterfaceOpaque(library: libraryPtr, getProcAddrFun: godotGetProcAddr)
+                setExtensionInterface(.rawInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr))
                 godotLibrary = OpaquePointer (libraryPtr)
                 extensionInit?.pointee = GDExtensionInitialization (
                     minimum_initialization_level: GDEXTENSION_INITIALIZATION_CORE,
