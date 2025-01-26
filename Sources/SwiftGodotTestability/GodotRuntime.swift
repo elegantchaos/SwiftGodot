@@ -44,7 +44,6 @@ public final class GodotRuntime {
     
 }
 
-private var godotLibrary: OpaquePointer!
 private var loadSceneCb: ((SceneTree) -> Void)?
 private func embeddedExtensionInit (userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
 private func embeddedExtensionDeinit (userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
@@ -59,8 +58,7 @@ private extension GodotRuntime {
                 guard let godotGetProcAddr, let libraryPtr else {
                     return 0
                 }
-                setExtensionInterface(interface: .rawInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr))
-                godotLibrary = OpaquePointer (libraryPtr)
+                setExtensionInterface(OpaqueExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr))
                 extensionInit?.pointee = GDExtensionInitialization (
                     minimum_initialization_level: GDEXTENSION_INITIALIZATION_CORE,
                     userdata: nil,
