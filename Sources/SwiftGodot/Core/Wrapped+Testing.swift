@@ -2,16 +2,20 @@ public extension Wrapped {
     struct Testing {
         /// Public API for tracking live objects
         public struct LiveObjects {
-            /// All framework objects
+            /// All framework objects.
+            /// For Testing purposes only.
             public static var framework: [Wrapped] { Array(liveFrameworkObjects.values) }
 
             /// All user-defined objects
+            /// For Testing purposes only.
             public static var subtyped: [Wrapped] { Array(liveSubtypedObjects.values) }
 
             /// All objects
+            /// For Testing purposes only.
             public static var all: [Wrapped] { framework + subtyped }
 
             /// Reset all existing tracked objects
+            /// For Testing purposes only.
             public static func reset() {
                 liveFrameworkObjects.removeAll()
                 liveSubtypedObjects.removeAll()
@@ -20,27 +24,15 @@ public extension Wrapped {
         
         /// Public API for monitoring class names.
         public struct ClassNames {
-            public typealias DuplicateNameCallback = (StringName, Wrapped.Type) -> Void
             /// Set a callback to be called when a duplicate class name is detected.
+            /// For Testing purposes only.
             public static func setDuplicateNameCallback(_ callback: @escaping DuplicateNameCallback) -> DuplicateNameCallback {
-                let old = duplicateClassNameDetected
-                duplicateClassNameDetected = callback
+                let old = duplicateClassCallback
+                duplicateClassCallback = callback
                 return old
             }
         }
     }
 }
 
-/// Currently contains all instantiated objects, but might want to separate those
-/// (or find a way of easily telling appart) framework objects from user subtypes
-internal var liveFrameworkObjects: [UnsafeRawPointer: Wrapped] = [:]
-internal var liveSubtypedObjects: [UnsafeRawPointer: Wrapped] = [:]
 
-/// Callback to be called when a duplicate class name is detected.
-internal var duplicateClassNameDetected: Wrapped.Testing.ClassNames.DuplicateNameCallback = { name, type in
-    preconditionFailure(
-        """
-        Godot already has a class named \(name), so I cannot register \(type) using that name. This is a fatal error because the only way I can tell whether Godot is handing me a pointer to a class I'm responsible for is by checking the class name.
-        """
-    )
-}

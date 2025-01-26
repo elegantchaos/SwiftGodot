@@ -32,6 +32,7 @@
 //
 // We ensure that all Godot
 
+
 @_implementationOnly import GDExtension
 
 func pd (_ str: String) {
@@ -318,6 +319,21 @@ func bindGodotInstance(instance: some Wrapped, handle: UnsafeRawPointer) {
 
 var userTypes: [String:(UnsafeRawPointer)->Wrapped] = [:]
 
+/// Callback to be called when a duplicate class name is detected.
+/// In normal operation, this should never be called, and if it is, it is a fatal error.
+/// For testing purposes however, you can set this to a custom callback to test the behavior.
+/// (see Wrapped+Testing.swift)
+public typealias DuplicateNameCallback = (StringName, Wrapped.Type) -> Void
+
+/// Callback to be called when a duplicate class name is detected.
+internal var duplicateClassCallback: DuplicateNameCallback = { name, type in
+    preconditionFailure(
+        """
+        Godot already has a class named \(name), so I cannot register \(type) using that name. This is a fatal error because the only way I can tell whether Godot is handing me a pointer to a class I'm responsible for is by checking the class name.
+        """
+    )
+}
+
 func register<T:Wrapped> (type name: StringName, parent: StringName, type: T.Type) {
     var nameContent = name.content
 
@@ -325,7 +341,7 @@ func register<T:Wrapped> (type name: StringName, parent: StringName, type: T.Typ
 
     let existingClassTag = gi.classdb_get_class_tag(&nameContent)
     if existingClassTag != nil {
-        duplicateClassNameDetected(name, type)
+        duplicateClassCallback(name, type)
     }
 
     func getVirtual(_ userData: UnsafeMutableRawPointer?, _ name: GDExtensionConstStringNamePtr?) ->  GDExtensionClassCallVirtual? {
@@ -378,7 +394,11 @@ public func unregister<T:Wrapped> (type: T.Type) {
     }
 }
 
-
+ 
+/// Currently contains all instantiated objects, but might want to separate those
+/// (or find a way of easily telling appart) framework objects from user subtypes
+internal var liveFrameworkObjects: [UnsafeRawPointer: Wrapped] = [:]
+internal var liveSubtypedObjects: [UnsafeRawPointer: Wrapped] = [:]
 
 // Lock for accessing the above
 var tableLock = NIOLock()
@@ -387,9 +407,6 @@ var tableLock = NIOLock()
 // this contains the handle to use, and prevents a new Godot object peer to
 // be created
 fileprivate var bindingObject: UnsafeMutableRawPointer? = nil
- 
- ///
- /// Looks into the liveSubtypedObjects table if we have an object registered for it,
 
 ///
 /// Looks into the liveSubtypedObjects table if we have an object registered for it,
