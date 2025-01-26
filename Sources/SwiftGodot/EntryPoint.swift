@@ -383,7 +383,7 @@ public func initializeSwiftModule(
     // with a description of what we should be doing:
     // https://github.com/migueldeicaza/SwiftGodot/issues/72
     if extensionInterface == nil {
-        extensionInterface = LibGodotExtensionInterface(library: GDExtensionClassLibraryPtr(libraryPtr), getProcAddrFun: getProcAddrFun)
+        extensionInterface = OpaqueExtensionInterface(library: GDExtensionClassLibraryPtr(libraryPtr), getProcAddrFun: getProcAddrFun)
     }
     extensionInitCallbacks[libraryPtr] = initHook
     extensionDeInitCallbacks[libraryPtr] = deInitHook
