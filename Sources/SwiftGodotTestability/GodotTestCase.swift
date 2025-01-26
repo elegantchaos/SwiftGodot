@@ -62,10 +62,10 @@ open class GodotTestCase: EmbeddedTestCase<GodotTestHost> {
 
 }
 
-extension GodotTestCase {
+public extension GodotTestCase {
 
     /// Asserts approximate equality of two floating point values based on `Math::is_equal_approx` implementation in Godot
-    public func assertApproxEqual<T: FloatingPoint & ExpressibleByFloatLiteral>(_ a: T?, _ b: T?, epsilon: T = 0.00001, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual<T: FloatingPoint & ExpressibleByFloatLiteral>(_ a: T?, _ b: T?, epsilon: T = 0.00001, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         // Check for exact equality first, required to handle "infinity" values.
         guard a != b else { return }
         guard let a, let b else {
@@ -79,7 +79,7 @@ extension GodotTestCase {
     }
 
     /// Asserts approximate equality of two vectors by comparing approximately each component
-    public func assertApproxEqual(_ a: Vector2?, _ b: Vector2?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual(_ a: Vector2?, _ b: Vector2?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         guard let a, let b else {
             XCTAssertEqual(a, b, message, file: file, line: line)
             return
@@ -89,7 +89,7 @@ extension GodotTestCase {
     }
 
     /// Asserts approximate equality of two vectors by comparing approximately each component
-    public func assertApproxEqual(_ a: Vector3?, _ b: Vector3?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual(_ a: Vector3?, _ b: Vector3?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         guard let a, let b else {
             XCTAssertEqual(a, b, message, file: file, line: line)
             return
@@ -100,7 +100,7 @@ extension GodotTestCase {
     }
 
     /// Asserts approximate equality of two vectors by comparing approximately each component
-    public func assertApproxEqual(_ a: Vector4?, _ b: Vector4?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual(_ a: Vector4?, _ b: Vector4?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         guard let a, let b else {
             XCTAssertEqual(a, b, message, file: file, line: line)
             return
@@ -112,7 +112,7 @@ extension GodotTestCase {
     }
 
     /// Asserts approximate equality of two quaternions by comparing approximately each component
-    public func assertApproxEqual(_ a: Quaternion?, _ b: Quaternion?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual(_ a: Quaternion?, _ b: Quaternion?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         guard let a, let b else {
             XCTAssertEqual(a, b, message, file: file, line: line)
             return
@@ -124,7 +124,7 @@ extension GodotTestCase {
     }
 
     /// Asserts approximate equality of two colors by comparing approximately each component
-    public func assertApproxEqual(_ a: Color?, _ b: Color?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
+    func assertApproxEqual(_ a: Color?, _ b: Color?, _ message: String = "", file: StaticString = #file, line: UInt = #line) {
         guard let a, let b else {
             XCTAssertEqual(a, b, message, file: file, line: line)
             return
