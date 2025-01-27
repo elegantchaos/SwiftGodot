@@ -7,9 +7,6 @@
 
 @_implementationOnly import GDExtension
 
-
-
-
 /// The pointer to the Godot Extension Interface
 var extensionInterface: ExtensionInterface!
 
@@ -32,6 +29,11 @@ func loadFunctions(loader: GDExtensionInterfaceGetProcAddress) {
 public func setExtensionInterface(_ interface: ExtensionInterface) {
     extensionInterface = interface
     loadGodotInterface(unsafeBitCast(interface.getProcAddr(), to: GDExtensionInterfaceGetProcAddress.self))
+}
+
+public func setExtensionInterfaceOpaque(library libraryPtr: UnsafeMutableRawPointer, getProcAddrFun godotGetProcAddr: Any) {
+    let interface = LibGodotExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr as! GDExtensionInterfaceGetProcAddress)
+    setExtensionInterface(interface)
 }
 
 // Extension initialization callback
@@ -371,8 +373,8 @@ public func initializeSwiftModule(
     _ godotGetProcAddrPtr: OpaquePointer,
     _ libraryPtr: OpaquePointer,
     _ extensionPtr: OpaquePointer,
-    initHook: @escaping (GDExtension.InitializationLevel) -> (),
-    deInitHook: @escaping (GDExtension.InitializationLevel) -> (),
+    initHook: @escaping (GDExtension.InitializationLevel) -> Void,
+    deInitHook: @escaping (GDExtension.InitializationLevel) -> Void,
     minimumInitializationLevel: GDExtension.InitializationLevel = .scene
 ) {
     let getProcAddrFun = unsafeBitCast(godotGetProcAddrPtr, to: GDExtensionInterfaceGetProcAddress.self)
@@ -383,7 +385,7 @@ public func initializeSwiftModule(
     // with a description of what we should be doing:
     // https://github.com/migueldeicaza/SwiftGodot/issues/72
     if extensionInterface == nil {
-        extensionInterface = OpaqueExtensionInterface(library: GDExtensionClassLibraryPtr(libraryPtr), getProcAddrFun: getProcAddrFun)
+        extensionInterface = LibGodotExtensionInterface(library: GDExtensionClassLibraryPtr(libraryPtr), getProcAddrFun: getProcAddrFun)
     }
     extensionInitCallbacks[libraryPtr] = initHook
     extensionDeInitCallbacks[libraryPtr] = deInitHook
@@ -401,13 +403,13 @@ public func initializeSwiftModule(
  */
 
 func withArgPointers(_ _args: UnsafeMutableRawPointer?..., body: ([UnsafeRawPointer?]) -> Void) {
-  body(unsafeBitCast(_args, to: [UnsafeRawPointer?].self))
+    body(unsafeBitCast(_args, to: [UnsafeRawPointer?].self))
 }
 
 #if os(Windows)
-typealias RawType = Int32
+    typealias RawType = Int32
 #else
-typealias RawType = UInt32
+    typealias RawType = UInt32
 #endif
 
 extension GDExtension.InitializationLevel {

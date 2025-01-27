@@ -6,60 +6,60 @@
 //
 
 import Foundation
-import libgodot
 import SwiftGodot
+import libgodot
 
 public final class GodotRuntime {
-    
+
     static var isInitialized: Bool = false
     static var isRunning: Bool = false
-    
+
     static var scene: SceneTree?
-    
-    static func run (completion: @escaping () -> Void) {
+
+    static func run(completion: @escaping () -> Void) {
         guard !isRunning else { return }
         isInitialized = true
         isRunning = true
-        runGodot (loadScene: { scene in
+        runGodot(loadScene: { scene in
             self.scene = scene
-            completion ()
+            completion()
         })
     }
-    
-    static func stop () {
+
+    static func stop() {
         isRunning = false
-        scene?.quit ()
+        scene?.quit()
     }
-    
-    public static func getScene () throws -> SceneTree {
+
+    public static func getScene() throws -> SceneTree {
         if let scene {
             return scene
         }
         throw RuntimeError.noSceneLoaded
     }
-    
+
     enum RuntimeError: Error {
         case noSceneLoaded
     }
-    
+
 }
 
 private var loadSceneCb: ((SceneTree) -> Void)?
-private func embeddedExtensionInit (userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
-private func embeddedExtensionDeinit (userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
+private func embeddedExtensionInit(userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
+private func embeddedExtensionDeinit(userData _: UnsafeMutableRawPointer?, l _: GDExtensionInitializationLevel) {}
 
-private extension GodotRuntime {
-    
-    static func runGodot (loadScene: @escaping (SceneTree) -> ()) {
+extension GodotRuntime {
+
+    fileprivate static func runGodot(loadScene: @escaping (SceneTree) -> Void) {
         loadSceneCb = loadScene
-        
-        libgodot_gdextension_bind (
+
+        libgodot_gdextension_bind(
             { godotGetProcAddr, libraryPtr, extensionInit in
                 guard let godotGetProcAddr, let libraryPtr else {
                     return 0
                 }
-                setExtensionInterface(OpaqueExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr))
-                extensionInit?.pointee = GDExtensionInitialization (
+                setExtensionInterfaceOpaque(library: libraryPtr, getProcAddrFun: godotGetProcAddr)
+                extensionInit?.pointee = GDExtensionInitialization(
                     minimum_initialization_level: GDEXTENSION_INITIALIZATION_CORE,
                     userdata: nil,
                     initialize: embeddedExtensionInit,
@@ -70,7 +70,7 @@ private extension GodotRuntime {
             },
             { ptr in
                 if let loadSceneCb, let ptr {
-                    loadSceneCb (SceneTree.createFrom (nativeHandle: ptr))
+                    loadSceneCb(SceneTree.createFrom(nativeHandle: ptr))
                 }
             }
         )
@@ -81,34 +81,31 @@ private extension GodotRuntime {
         setenv("__CFBundleIdentifier", "SwiftGodotKit", 0)
 
         let args = ["SwiftGodotKit", "--headless", "--verbose"]
-        withUnsafePtr (strings: args) { ptr in
-            godot_main (Int32 (args.count), ptr)
+        withUnsafePtr(strings: args) { ptr in
+            godot_main(Int32(args.count), ptr)
         }
     }
 
     // Courtesy of GPT-4
-    static func withUnsafePtr (strings: [String], callback: (UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?) -> Void) {
+    fileprivate static func withUnsafePtr(strings: [String], callback: (UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?) -> Void) {
         let cStrings: [UnsafeMutablePointer<Int8>?] = strings.map { string in
             // Convert Swift string to a C string (null-terminated)
-            strdup (string)
+            strdup(string)
         }
 
         // Allocate memory for the array of C string pointers
-        let cStringArray = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate (capacity: cStrings.count + 1)
-        cStringArray.initialize (from: cStrings, count: cStrings.count)
+        let cStringArray = UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>.allocate(capacity: cStrings.count + 1)
+        cStringArray.initialize(from: cStrings, count: cStrings.count)
 
         // Add a null pointer at the end of the array to indicate its end
         cStringArray[cStrings.count] = nil
 
-        callback (cStringArray)
+        callback(cStringArray)
 
-        for i in 0 ..< strings.count {
-            free (cStringArray[i])
+        for i in 0..<strings.count {
+            free(cStringArray[i])
         }
-        cStringArray.deallocate ()
+        cStringArray.deallocate()
     }
 
-    
 }
-
-
