@@ -1,4 +1,27 @@
+//
+//  ExtensionInterface.swift: Extension interface for SwiftGodot
+//
+
 @_implementationOnly import GDExtension
+
+/// The pointer to the Godot Extension Interface
+var extensionInterface: ExtensionInterface!
+
+///
+/// This method is used to configure the extension interface for SwiftGodot to
+/// operate.   It is only used when you use SwiftGodot embedded into an
+/// application - as opposed to using SwiftGodot purely as an extension
+///
+public func setExtensionInterface(_ interface: ExtensionInterface) {
+    extensionInterface = interface
+    loadGodotInterface(unsafeBitCast(interface.getProcAddr(), to: GDExtensionInterfaceGetProcAddress.self))
+}
+
+/// Opaque version of `setExtensionInterface` which can be called from another module without importing `GDExtension`.
+public func setExtensionInterfaceOpaque(library libraryPtr: UnsafeMutableRawPointer, getProcAddrFun godotGetProcAddr: Any) {
+    let interface = LibGodotExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr as! GDExtensionInterfaceGetProcAddress)
+    setExtensionInterface(interface)
+}
 
 public protocol ExtensionInterface {
 

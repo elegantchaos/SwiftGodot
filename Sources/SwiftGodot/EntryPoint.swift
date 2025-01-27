@@ -7,9 +7,6 @@
 
 @_implementationOnly import GDExtension
 
-/// The pointer to the Godot Extension Interface
-var extensionInterface: ExtensionInterface!
-
 /// This variable is used to trigger a reloading of the method definitions in Godot, this is only needed
 /// for scenarios where SwiftGodot is being used with multiple active Godot runtimes in the same process
 public var swiftGodotLibraryGeneration: UInt16 = 0
@@ -19,21 +16,6 @@ var extensionDeInitCallbacks: [OpaquePointer: ((GDExtension.InitializationLevel)
 
 func loadFunctions(loader: GDExtensionInterfaceGetProcAddress) {
 
-}
-
-///
-/// This method is used to configure the extension interface for SwiftGodot to
-/// operate.   It is only used when you use SwiftGodot embedded into an
-/// application - as opposed to using SwiftGodot purely as an extension
-///
-public func setExtensionInterface(_ interface: ExtensionInterface) {
-    extensionInterface = interface
-    loadGodotInterface(unsafeBitCast(interface.getProcAddr(), to: GDExtensionInterfaceGetProcAddress.self))
-}
-
-public func setExtensionInterfaceOpaque(library libraryPtr: UnsafeMutableRawPointer, getProcAddrFun godotGetProcAddr: Any) {
-    let interface = LibGodotExtensionInterface(library: libraryPtr, getProcAddrFun: godotGetProcAddr as! GDExtensionInterfaceGetProcAddress)
-    setExtensionInterface(interface)
 }
 
 // Extension initialization callback
@@ -413,12 +395,14 @@ func withArgPointers(_ _args: UnsafeMutableRawPointer?..., body: ([UnsafeRawPoin
 #endif
 
 extension GDExtension.InitializationLevel {
+    /// Converts the public Swift type to the private Godot type.
     var asCType: GDExtensionInitializationLevel {
         GDExtensionInitializationLevel(RawType(rawValue))
     }
 }
 
 extension GDExtensionInitializationLevel {
+    /// Converts the private Godot type to the public Swift type.
     var asSwiftType: GDExtension.InitializationLevel {
         GDExtension.InitializationLevel(rawValue: Int64(exactly: rawValue)!)!
     }
