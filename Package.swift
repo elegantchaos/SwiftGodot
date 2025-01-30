@@ -3,6 +3,11 @@
 import CompilerPluginSupport
 import PackageDescription
 
+/// Swift settings to use for all targets.
+let standardSettings: [SwiftSetting] = [
+    .swiftLanguageMode(.v5),                        // TODO: Change to .v6 for each target as it is converted to Swift 6
+]
+
 // Products define the executables and libraries a package produces, and make them visible to other packages.
 var products: [Product] = [
     .library(
@@ -50,14 +55,14 @@ var targets: [Target] = [
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 
     // This contains GDExtension's JSON API data models
     .target(
         name: "ExtensionApi",
         exclude: ["ExtensionApiJson.swift", "extension_api.json"],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 
     // This contains a resource bundle with extension_api.json
@@ -67,7 +72,7 @@ var targets: [Target] = [
         exclude: ["ApiJsonModel.swift", "ApiJsonModel+Extra.swift"],
         sources: ["ExtensionApiJson.swift"],
         resources: [.process("extension_api.json")],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 
     // The generator takes Godot's JSON-based API description as input and
@@ -81,11 +86,9 @@ var targets: [Target] = [
         ],
         path: "Generator",
         exclude: ["README.md"],
-        swiftSettings: [
-            .swiftLanguageMode(.v5)
+        swiftSettings: standardSettings
             // Uncomment for using legacy array-based marshalling
-            //.define("LEGACY_MARSHALING")
-        ]
+            // + [.define("LEGACY_MARSHALING")]
     ),
 
     // This is a build-time plugin that invokes the generator and produces
@@ -108,7 +111,7 @@ var targets: [Target] = [
     // This allows the Swift code to call into the Godot bridge API (GDExtension)
     .target(
         name: "GDExtension",
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 
     // These are macros that can be used by third parties to simplify their
@@ -121,14 +124,14 @@ var targets: [Target] = [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         ],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
     // This contains sample code showing how to use the SwiftGodot API
     .target(
         name: "SimpleExtension",
         dependencies: ["SwiftGodot"],
         exclude: ["SwiftSprite.gdextension", "README.md"],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 
     // This is the binding itself, it is made up of our generated code for the
@@ -137,8 +140,7 @@ var targets: [Target] = [
     .target(
         name: "SwiftGodot",
         dependencies: ["GDExtension"],
-        swiftSettings: [
-            .swiftLanguageMode(.v5),
+        swiftSettings: standardSettings + [
             .define("CUSTOM_BUILTIN_IMPLEMENTATIONS"),
         ],
         plugins: ["CodeGeneratorPlugin", "SwiftGodotMacroLibrary"]
@@ -152,7 +154,7 @@ var targets: [Target] = [
             "ExtensionApi",
             "ExtensionApiJson",
         ],
-        swiftSettings: [.swiftLanguageMode(.v5)]
+        swiftSettings: standardSettings
     ),
 ]
 
@@ -167,7 +169,7 @@ var targets: [Target] = [
                 "SwiftGodot",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: standardSettings
         ))
 #endif
 
@@ -206,7 +208,7 @@ var targets: [Target] = [
                 "libgodot_tests",
                 "GDExtension",
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: standardSettings
         ),
 
         // General purpose runtime dependant tests
@@ -215,7 +217,7 @@ var targets: [Target] = [
             dependencies: [
                 "SwiftGodotTestability"
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: standardSettings
         ),
 
         // Runtime dependant tests based on the engine tests from Godot's repository
@@ -224,7 +226,7 @@ var targets: [Target] = [
             dependencies: [
                 "SwiftGodotTestability"
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: standardSettings
         ),
     ])
 
