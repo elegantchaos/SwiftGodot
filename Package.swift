@@ -6,6 +6,7 @@ import PackageDescription
 /// Swift settings to use for all targets.
 let standardSettings: [SwiftSetting] = [
     .swiftLanguageMode(.v5),                        // TODO: Change to .v6 for each target as it is converted to Swift 6
+    .unsafeFlags(["-diagnostic-style=llvm"])        // Use LLVM diagnostic style; The swift-vscode plugin can parse this style.
 ]
 
 // Products define the executables and libraries a package produces, and make them visible to other packages.
