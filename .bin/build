@@ -1,0 +1,1 @@
+swift build --build-tests  -Xswiftc -diagnostic-style=llvm
